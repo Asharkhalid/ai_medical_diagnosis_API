@@ -11,7 +11,7 @@ diseases = [
 
 # All possible symptoms across the diseases
 symptoms = [
-    "fever", "headache", "cough", "fatigue", "stomach_pain",
+    "fever", "headache", "cough", "fatigue", "abdominal_pain",
     "nausea", "vomiting", "sore_throat", "shortness_of_breath",
     "body_pain", "chills", "loss_of_taste", "loss_of_smell",
     "diarrhea", "chest_pain", "wheezing", "dizziness",
@@ -24,9 +24,9 @@ disease_profiles = {
     "Influenza": ["fever", "chills", "body_pain", "fatigue", "headache", "cough"],
     "COVID-19": ["fever", "cough", "loss_of_taste", "loss_of_smell", "fatigue", "shortness_of_breath"],
     "Acute Migraine": ["headache", "nausea", "dizziness", "vomiting"],
-    "Gastroenteritis": ["stomach_pain", "nausea", "vomiting", "diarrhea", "fever"],
+    "Gastroenteritis": ["abdominal_pain", "nausea", "vomiting", "diarrhea", "fever"],
     "Dengue Fever": ["fever", "headache", "body_pain", "fatigue", "nausea"],
-    "Typhoid": ["fever", "headache", "stomach_pain", "fatigue", "weight_loss"],
+    "Typhoid": ["fever", "headache", "abdominal_pain", "fatigue", "weight_loss"],
     "Pneumonia": ["cough", "fever", "chills", "shortness_of_breath", "chest_pain"],
     "Bronchitis": ["cough", "fatigue", "shortness_of_breath", "chest_pain"],
     "Tuberculosis": ["cough", "weight_loss", "fatigue", "fever", "sweating"],

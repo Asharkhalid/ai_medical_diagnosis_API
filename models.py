@@ -45,3 +45,16 @@ class DiagnosisFeedback(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     diagnosis = relationship("DiagnosisHistory", back_populates="feedbacks")
+
+class ExpertRule(Base):
+    __tablename__ = "expert_rules"
+
+    rule_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    condition = Column(String(255), nullable=False)
+    target = Column(String(100), nullable=False)
+    action = Column(String(100), nullable=False)
+    priority = Column(SmallInteger, nullable=False)
+    created_by = Column(UUID(as_uuid=True), ForeignKey("users.user_id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    
+    doctor = relationship("User")

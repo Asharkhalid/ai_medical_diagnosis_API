@@ -1,5 +1,6 @@
 import re
 import nltk
+import difflib
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
@@ -26,9 +27,9 @@ class MedicalNLPEngine:
         # Medical Ontology / Synonym Mapping
         self.synonym_map = {
             "temperature": "fever",
-            "stomach pain": "stomach_pain",
-            "abdominal pain": "stomach_pain",
-            "belly ache": "stomach_pain",
+            "stomach pain": "abdominal_pain",
+            "belly ache": "abdominal_pain",
+            "stomach_pain": "abdominal_pain",
             "head ache": "headache",
             "migraine": "headache",
             "throw up": "nausea",
@@ -53,19 +54,47 @@ class MedicalNLPEngine:
                 "weight_loss", "sweating", "pale_skin", "frequent_urination"
             ]
 
+    def add_synonym(self, phrase, target):
+        self.synonym_map[phrase.lower()] = target
+        return True
+
+    def remove_synonym(self, phrase):
+        if phrase.lower() in self.synonym_map:
+            del self.synonym_map[phrase.lower()]
+            return True
+        return False
+
     def clean_text(self, text):
         text = text.lower()
         # Remove punctuation
         text = re.sub(r'[^\w\s]', '', text)
         return text
 
-    def extract_symptoms(self, text):
-        # Apply 2-gram synonyms first
+    def extract_severity(self, text):
         text = text.lower()
+        if any(word in text for word in ["severe", "high", "extreme", "bad", "terrible", "intense"]):
+            return 3
+        if any(word in text for word in ["mild", "low", "slight", "minor"]):
+            return 1
+        return None
+        
+    def extract_duration(self, text):
+        text = text.lower()
+        if "week" in text or "month" in text:
+            return 3
+        if "day" in text:
+            return 2
+        if "hour" in text or "minute" in text:
+            return 1
+        return None
+
+    def extract_symptoms(self, text):
+        # Apply 2-gram synonyms first exactly
+        text_lower = text.lower()
         for syn, target in self.synonym_map.items():
-            text = text.replace(syn, target)
+            text_lower = text_lower.replace(syn, target)
             
-        cleaned = self.clean_text(text)
+        cleaned = self.clean_text(text_lower)
         
         # Tokenization & Stop-word removal
         tokens = word_tokenize(cleaned)
@@ -74,9 +103,27 @@ class MedicalNLPEngine:
         # Lemmatization
         lemmatized = [self.lemmatizer.lemmatize(w) for w in filtered_tokens]
         
-        # Extract symptoms that are in our vocabulary
-        extracted = list(set([w for w in lemmatized if w in self.supported_symptoms]))
-        return extracted
+        extracted = []
+        corrections = {}
+        
+        for word in lemmatized:
+            if word in self.supported_symptoms:
+                extracted.append(word)
+            else:
+                # Fuzzy matching / Typo Tolerance against supported symptoms
+                matches = difflib.get_close_matches(word, self.supported_symptoms, n=1, cutoff=0.75)
+                if matches:
+                    extracted.append(matches[0])
+                    corrections[word] = matches[0]
+                else:
+                    # Fuzzy match against synonym map keys
+                    syn_matches = difflib.get_close_matches(word, list(self.synonym_map.keys()), n=1, cutoff=0.8)
+                    if syn_matches:
+                        target = self.synonym_map[syn_matches[0]]
+                        extracted.append(target)
+                        corrections[word] = target
+
+        return list(set(extracted)), corrections
 
     def vectorize_features(self, extracted_symptoms, severity=1, duration=1):
         """
