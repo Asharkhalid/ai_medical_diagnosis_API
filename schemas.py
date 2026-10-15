@@ -7,11 +7,23 @@ class UserCreate(BaseModel):
     full_name: str
     email: EmailStr
     password: str
+
+class AdminUserCreate(BaseModel):
+    full_name: str
+    email: EmailStr
+    password: str
     role: int
 
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+class AdminUserEdit(BaseModel):
+    full_name: str
+    email: EmailStr
+
+class UserStatusRequest(BaseModel):
+    is_active: bool
 
 class UserResponse(BaseModel):
     user_id: UUID
@@ -31,6 +43,16 @@ class DiagnosisRequest(BaseModel):
     input_text: str
     severity: int
     duration: int
+
+class AuditLogResponse(BaseModel):
+    log_id: UUID
+    user_id: Optional[UUID]
+    event_type: str
+    description: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
 
 class SynonymRequest(BaseModel):
     phrase: str
